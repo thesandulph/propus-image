@@ -1,10 +1,14 @@
-import {isArray, isObject} from '@propus/utility';
+import {isArray, isObject, isString} from '@propus/utility';
 
 const imageSet = (source) => {
-    const srcset = source.map((item, index) => {
-        const tag = index ? `${index + 1}x` : '';
-        return [item, tag].join(' ').trim();
-    }).join(', ');
+    const srcset = Object.keys(source).reduce((accumulator, item) => {
+        const tag = item === '1x' ? '' : item;
+        const value = [source[item], tag].join(' ').trim();
+        if (value) {
+            return [accumulator, value].join(', ')
+        }
+        return accumulator;
+    }, '');
     return {srcset};
 };
 
@@ -16,16 +20,19 @@ const sourceArrayToObject = (source) => {
 };
 
 export const makeImage = (source, key) => {
+    if (isString(source)) {
+        return source;
+    }
     if (isArray(source)) {
-        const config = sourceArrayToObject()
+        const config = sourceArrayToObject(source)
         return {
             src: source[key],
-            ...arrayImageSet(source),
+            ...imageSet(config),
         };
     }
     if (isObject(source)) {
         return {
-            src: other[src],
+            src: source[key],
             ...imageSet(source),
         };
     }
